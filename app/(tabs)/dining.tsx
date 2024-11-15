@@ -24,7 +24,7 @@ export default function HomeScreen() {
       id: 1,
       name: "McDonalds",
       rating: 4.1,
-      image: require("../../assets/images/burger.jpeg"),
+      image: require("../../assets/images/chola.jpeg"),
     },
     {
       id: 2,
@@ -36,13 +36,13 @@ export default function HomeScreen() {
       id: 3,
       name: "Pizza hut",
       rating: 4.1,
-      image: require("../../assets/images/images.jpeg"),
+      image: require("../../assets/images/chola.jpeg"),
     },
     {
       id: 4,
       name: "Starbucks",
       rating: 4.1,
-      image: require("../../assets/images/subway.jpeg"),
+      image: require("../../assets/images/chola.jpeg"),
     },
   ];
 
