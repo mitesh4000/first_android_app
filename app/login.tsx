@@ -1,6 +1,8 @@
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
+
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -9,16 +11,74 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import useBearStore from "./utils/zustandStore";
+const { bears } = useBearStore();
+const [authToken, setToken] = useState("");
 export default function LoginScreen() {
   const navigation = useNavigation();
+  interface FormState {
+    email: string | undefined;
+    password: string | undefined;
+  }
 
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [otp, setOtp] = useState("");
+  interface FormValidationState {
+    email: string | undefined;
+    password: string | undefined;
+  }
+  const [formState, setFormState] = useState<FormState>({
+    email: "test@mail.com",
+    password: "password",
+  });
 
-  const handleLogin = () => {
-    // Handle login logic here
-    console.log("Login with:", { mobileNumber, otp });
+  // Initialize validation state
+  const [formValidationState, setFormValidationState] =
+    useState<FormValidationState>({
+      email: undefined,
+      password: undefined,
+    });
+
+  const validate = () => {
+    if (!formState.email) {
+      formValidationState.email = "email is required";
+      return false;
+    }
+    if (!formValidationState.password) {
+      formValidationState.email = "password is required";
+      return false;
+    }
+    console.log("This is a log message");
+
+    return true;
+  };
+  const handleLogin = async () => {
+    // if (!validate()) return;
+
+    try {
+      const response = await fetch(
+        "http://192.168.29.95:8000/api/v1/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formState.email,
+            password: formState.password,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data.error) {
+        Alert.alert("Login failed", data.message || data.message);
+      }
+      console.log(data.data);
+      if (data.data) {
+        router.navigate("./(tabs)");
+        router.replace("/(tabs)", { relativeToDirectory: true });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -34,53 +94,62 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Log In</Text>
         <Text style={styles.subtitle}>Please login to using app</Text>
+        <Text>{bears}</Text>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>
-              Mobile Number<Text style={styles.required}>*</Text>
+              email<Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter Mobile Number"
-              value={mobileNumber}
-              onChangeText={setMobileNumber}
-              keyboardType="phone-pad"
+              placeholder="email"
+              value={formState.email}
+              onChangeText={(text) =>
+                setFormState({ ...formState, email: text })
+              }
             />
+            <Text style={styles.invalidInput}>{formValidationState.email}</Text>
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>
-              Otp<Text style={styles.required}>*</Text>
+              password<Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter otp"
-              value={otp}
-              onChangeText={setOtp}
+              placeholder="password"
+              value={formState.password}
+              onChangeText={(text) =>
+                setFormState({ ...formState, password: text })
+              }
               secureTextEntry
             />
-          </View>
 
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => navigation.navigate("(tabs)")}
-          >
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
+            <Text style={styles.invalidInput}>
+              {formValidationState.password}
+            </Text>
 
-          <View style={styles.alternativeLogin}>
-            <Text style={styles.alternativeText}>Login with </Text>
-            <TouchableOpacity>
-              <Text style={styles.emailText}>Email Address</Text>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => handleLogin()}
+            >
+              <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
-          </View>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.noAccountText}>Don't Have An Account? </Text>
-            <TouchableOpacity>
-              <Text style={styles.signupText}>Sign Up</Text>
-            </TouchableOpacity>
+            <View style={styles.alternativeLogin}>
+              <Text style={styles.alternativeText}>Login with </Text>
+              <TouchableOpacity>
+                <Text style={styles.emailText}>Email Address</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.signupContainer}>
+              <Text style={styles.noAccountText}>Don't Have An Account? </Text>
+              <TouchableOpacity>
+                <Text style={styles.signupText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
@@ -89,6 +158,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  invalidInput: {
+    fontSize: 12,
+    color: "red",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

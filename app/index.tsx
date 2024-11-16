@@ -1,4 +1,4 @@
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import React from "react";
 import {
   Image,
@@ -43,7 +43,7 @@ export default function WelcomeScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("login")}
+          onPress={() => router.navigate("./login")}
         >
           <Text style={styles.buttonText}>Log In Now</Text>
         </TouchableOpacity>
